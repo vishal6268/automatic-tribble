@@ -2,7 +2,23 @@ import React, { useState } from 'react';
 import './Admin.css';
 
 const Admin = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('dashboard');
+
+  // Admin password - in a real app, this would be handled securely on the backend
+  const ADMIN_PASSWORD = 'admin123';
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (password === ADMIN_PASSWORD) {
+      setIsAuthenticated(true);
+      setError('');
+    } else {
+      setError('Invalid admin password');
+    }
+  };
 
   // Mock data for demonstration
   const stats = {
@@ -23,6 +39,39 @@ const Admin = () => {
     { id: 2, title: 'React Fundamentals', createdBy: 'Admin', questions: 15, status: 'Draft' },
     { id: 3, title: 'CSS Advanced', createdBy: 'Admin', questions: 25, status: 'Published' },
   ];
+
+  const renderLoginForm = () => (
+    <div className="admin-login-container">
+      <div className="admin-login-card">
+        <h1>🔒 Admin Access</h1>
+        <p>Enter the admin password to access the dashboard</p>
+
+        {error && <div className="error-message">{error}</div>}
+
+        <form onSubmit={handleLogin} className="admin-login-form">
+          <div className="form-group">
+            <label htmlFor="admin-password">Admin Password</label>
+            <input
+              type="password"
+              id="admin-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter admin password"
+              required
+            />
+          </div>
+          <button type="submit" className="admin-login-btn">
+            Access Admin Panel
+          </button>
+        </form>
+
+        <div className="admin-login-info">
+          <p><strong>Demo Password:</strong> admin123</p>
+          <small>This is for demonstration purposes only. In production, use secure authentication.</small>
+        </div>
+      </div>
+    </div>
+  );
 
   const renderDashboard = () => (
     <div className="admin-dashboard">
@@ -283,10 +332,26 @@ const Admin = () => {
     </div>
   );
 
+  if (!isAuthenticated) {
+    return renderLoginForm();
+  }
+
   return (
     <div className="admin-container">
       <div className="admin-sidebar">
-        <h2>Admin Panel</h2>
+        <div className="admin-header">
+          <h2>Admin Panel</h2>
+          <button
+            className="logout-btn"
+            onClick={() => {
+              setIsAuthenticated(false);
+              setPassword('');
+              setError('');
+            }}
+          >
+            Logout
+          </button>
+        </div>
         <nav className="admin-nav">
           <button
             className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
