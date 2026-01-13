@@ -7,6 +7,7 @@ const Auth = () => {
   const { token } = useParams(); // For reset password
   const location = useLocation();
   const [mode, setMode] = useState('login'); // 'login', 'forgot', 'reset'
+  const [userType, setUserType] = useState('user'); // 'user' or 'admin'
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -40,14 +41,35 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      // Simulate API call
-      console.log('Logging in with:', formData.email, formData.password);
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const endpoint = '/api/auth/login';
+      const response = await fetch(`http://localhost:5000${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        })
+      });
 
-      // On success, navigate to home
-      navigate('/');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Login failed');
+      }
+
+      const data = await response.json();
+      
+      if (userType === 'admin') {
+        localStorage.setItem('adminToken', data.token);
+        navigate('/admin');
+      } else {
+        localStorage.setItem('userToken', data.token);
+        localStorage.setItem('userEmail', data.user.email);
+        navigate('/profile');
+      }
     } catch (err) {
-      setError('Invalid email or password');
+      setError(err.message || 'Invalid email or password');
     } finally {
       setIsLoading(false);
     }
@@ -119,12 +141,37 @@ const Auth = () => {
     setFormData({ email: '', password: '', confirmPassword: '' });
   };
 
+  const switchUserType = (type) => {
+    setUserType(type);
+    setError('');
+    setMessage('');
+    setFormData({ email: '', password: '', confirmPassword: '' });
+  };
+
   return (
     <div className="auth-container">
       <div className="auth-card">
         {mode === 'login' && (
           <>
             <h1>Login</h1>
+            
+            {/* User Type Toggle */}
+            <div className="user-type-toggle">
+              <button
+                type="button"
+                className={`toggle-btn ${userType === 'user' ? 'active' : ''}`}
+                onClick={() => switchUserType('user')}
+              >
+                User Login
+              </button>
+              <button
+                type="button"
+                className={`toggle-btn ${userType === 'admin' ? 'active' : ''}`}
+                onClick={() => switchUserType('admin')}
+              >
+                Admin Login
+              </button>
+            </div>
             
             {error && <div className="error-message">{error}</div>}
 

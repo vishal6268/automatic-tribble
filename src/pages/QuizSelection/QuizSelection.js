@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Practice.css';
-import { quizzesAPI, leaderboardAPI } from '../../services/adminApi';
+import './QuizSelection.css';
+import { quizzesAPI } from '../../services/adminApi';
 
-const Practice = () => {
+const QuizSelection = () => {
   const navigate = useNavigate();
   const [quizzes, setQuizzes] = useState([]);
   const [filteredQuizzes, setFilteredQuizzes] = useState([]);
@@ -32,7 +32,7 @@ const Practice = () => {
     try {
       const quizzesData = await quizzesAPI.getAll();
       // Filter only published quizzes
-      const publishedQuizzes = quizzesData.filter(q => q.status === 'Published' || q.status === 'published');
+      const publishedQuizzes = quizzesData.filter(q => q.status === 'published' || q.status === 'Published');
       
       setQuizzes(publishedQuizzes);
       setFilteredQuizzes(publishedQuizzes);
@@ -89,6 +89,16 @@ const Practice = () => {
     // Store selected quiz info in localStorage
     localStorage.setItem('selectedQuizId', quiz.id);
     localStorage.setItem('selectedQuizTitle', quiz.title);
+    // Store quiz selection in backend for user history
+    const token = localStorage.getItem('userToken');
+    fetch('http://localhost:5000/users/quiz-history', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ quizId: quiz.id })
+    });
     // Navigate to MCQ test page
     navigate('/test');
   };
@@ -103,20 +113,20 @@ const Practice = () => {
 
   if (loading) {
     return (
-      <div className="practice-container">
+      <div className="quiz-selection-container">
         <div className="loading-spinner">Loading quizzes...</div>
       </div>
     );
   }
 
   return (
-    <div className="practice-container">
+    <div className="quiz-selection-container">
       {/* Header */}
-      <div className="practice-header">
+      <div className="quiz-selection-header">
         <div className="header-content">
           <div>
-            <h1>📝 Practice Quizzes</h1>
-            <p>Improve your skills with our collection of quizzes</p>
+            <h1>📝 Choose Your Quiz</h1>
+            <p>Select from our collection of quizzes and test your knowledge</p>
             <p className="user-info">Logged in as: <strong>{userEmail}</strong></p>
           </div>
           <button className="logout-btn" onClick={handleLogout}>Logout</button>
@@ -294,4 +304,4 @@ const Practice = () => {
   );
 };
 
-export default Practice;
+export default QuizSelection;

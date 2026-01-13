@@ -16,6 +16,7 @@ import Register from './pages/Register/Register';
 import Admin from './pages/Admin/Admin';
 import Profile from './pages/Profile/Profile';
 import Practice from './pages/Practice/Practice';
+import QuizSelection from './pages/QuizSelection/QuizSelection';
 import MCQTestPlatform from './pages/MCQTestPlatform'; // Tera main test code [cite: 145]
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Auth />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/quiz-selection" element={<QuizSelection />} />
             <Route path="/practice" element={<Practice />} />
             <Route path="/test" element={<MCQTestPlatform />} /> {/* MCQ Portal Route [cite: 145] */}
             <Route path="/leaderboard" element={<Leaderboard />} />
